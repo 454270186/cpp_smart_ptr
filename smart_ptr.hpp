@@ -20,7 +20,6 @@ private:
 };
 
 
-
 template <typename T>
 class smart_ptr {
 public:
@@ -68,6 +67,8 @@ public:
         }
     }
 
+    // 实现对内部指针赋值时，使用一个现有的共享计数
+    // 为了更方便实现dynamic_pointer_cast
     template <typename U>
     smart_ptr(const smart_ptr<U>& other, T* ptr) {
         ptr_ = ptr;
@@ -84,7 +85,8 @@ public:
         }
     }
 
-    T* get() { return ptr_; }
+    T* get() const { return ptr_; }
+
     long use_count() {
         if (ptr_) {
             return shared_cnt_->get_count();
@@ -112,6 +114,39 @@ private:
     T* ptr_;
     shared_count* shared_cnt_;
 };
+
+template <typename T>
+void swap(const smart_ptr<T>& lhs, const smart_ptr<T>& rhs) {
+    lhs.swap(rhs);
+}
+
+// 实现四种类型转换
+// 将类型U转换为类型T
+template <typename T, typename U>
+smart_ptr<T> static_pointer_cast(const smart_ptr<U>& other) {
+    T* ptr = static_cast<T*>(other.get());
+    return smart_ptr<T>(other, ptr);
+}
+
+template <typename T, typename U>
+smart_ptr<T> dynamic_pointer_cast(const smart_ptr<U>& other) {
+    T* ptr = dynamic_cast<T*>(other.get());
+    // 这里不能直接用拷贝构造
+    // 因为底层U* ptr不能隐式转换为T* ptr
+    return smart_ptr<T>(other, ptr);
+}
+
+template <typename T, typename U>
+smart_ptr<T> reinterpret_pointer_cast(const smart_ptr<U>& other) {
+    T* ptr = reinterpret_cast<T*>(other.get());
+    return smart_ptr<T>(other, ptr);
+}
+
+template <typename T, typename U>
+smart_ptr<T> const_pointer_cast(const smart_ptr<U>& other) {
+    T* ptr = const_cast<T*>(other.get());
+    return smart_ptr<T>(other, ptr);
+}
 
 
 #endif

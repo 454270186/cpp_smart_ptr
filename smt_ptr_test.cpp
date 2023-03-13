@@ -28,4 +28,10 @@ int main() {
         printf("ptr1 is not empty\n");
     }
 
+    // test: dynamic_pointer_cast
+    smart_ptr<circle> ptr3 = dynamic_pointer_cast<circle>(ptr2);
+    printf("Use count of ptr3 is %ld\n", ptr3.use_count());
+
+    smart_ptr<circle> ptr4 = static_pointer_cast<circle>(ptr2);
+    printf("Use count of ptr3 is %ld\n", ptr4.use_count());
 }
