@@ -117,3 +117,28 @@ Use count of ptr3 is 3
 Use count of ptr3 is 4
 ~circle()
 ```
+
+
+**注意**
+
+在函数
+```c++
+template <typename T, typename U>
+smart_ptr<T> static_pointer_cast(const smart_ptr<U>& other) {
+    T* ptr = static_cast<T*>(other.get());
+    return smart_ptr<T>(other, ptr);
+}
+```
+return时不能用
+```c++
+template <typename U>
+smart_ptr(const smart_ptr<U>& other)
+```
+拷贝构造函数的原因是：
+如果是将基类显式转换为子类，调用拷贝构造函数，其中的ptr_ = other.ptr_, 将基类指针隐式转换为子类指针，
+这种下行隐式转换是不合法的； 所以在实现自定义的强制类型转换中，要用下面这个构造函数:
+```c++
+template <typename U>
+smart_ptr(const smart_ptr<U>& other, T* ptr)
+```
+在自定义强制类型转化函数中，先将基类指针显式转化为子类指针，再用上面这个构造函数构造转换后的子类对象，从而防止不合法的下行转换
