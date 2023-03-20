@@ -1,6 +1,7 @@
 #ifndef _SMART_PTR
 #define _SMART_PTR
 #include <algorithm>
+#include <memory>
 
 class shared_count {
 public:
@@ -110,6 +111,10 @@ public:
         swap(shared_cnt_, rhs.shared_cnt_);
     }
 
+    void reset() noexcept {
+        smart_ptr().swap(*this);
+    }
+
 private:
     T* ptr_;
     shared_count* shared_cnt_;
@@ -148,5 +153,13 @@ smart_ptr<T> const_pointer_cast(const smart_ptr<U>& other) {
     return smart_ptr<T>(other, ptr);
 }
 
+// 实现类似make_shared()的模板函数
+template<typename T, typename... Args>
+smart_ptr<T> make_smart(Args&&... args) {
+    std::allocator<T> allocator;
+    T* ptr = allocator.allocate(1);
+    allocator.construct(ptr, std::forward<Args>(args)...);
+    return smart_ptr<T>(ptr);
+}
 
 #endif
